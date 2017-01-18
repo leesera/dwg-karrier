@@ -144,24 +144,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onPostExecute(String result) {
 
     }
-=======
-    DataBaseOpenHelper dataBaseOpenHelper = new DataBaseOpenHelper(this);
-
-    ArrayList<ScriptedURL> scriptedURLs = dataBaseOpenHelper.getUrlList();
-
-    TextView textView = (TextView) findViewById(R.id.testText);
-    Log.d("arraylist","start");
-
-    int i=0;
-    String str="";
-    while(i<scriptedURLs.size()){
-      str = str+"\n"+scriptedURLs.get(i).url;
-      i++;
-    }
-
-    textView.setText(str);
-
->>>>>>> a587756... add new class scriptsUrl and getUrlList() method
   }
-
 }
