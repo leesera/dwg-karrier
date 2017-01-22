@@ -85,11 +85,11 @@ public class MainActivity extends AppCompatActivity {
           return;
         }
 
-        Date cur_time = new Date(System.currentTimeMillis());
+        Date curTime = new Date(System.currentTimeMillis());
         Calendar cal = Calendar.getInstance();
-        cal.setTime(cur_time);
-        String take_time = String.valueOf(editText.getText());
-        cal.add(Calendar.MINUTE, Integer.parseInt(take_time));
+        cal.setTime(curTime);
+        String inputTime = String.valueOf(editText.getText());
+        cal.add(Calendar.MINUTE, Integer.parseInt(inputTime));
         Date d = new Date(cal.getTimeInMillis());
 
         Intent intent = new Intent(MainActivity.this, ListActivity.class);
