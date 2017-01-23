@@ -78,7 +78,6 @@ public class ContentView extends AppCompatActivity {
       try {
         URL url = new URL(strings[0]);
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-        conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setRequestProperty("x-api-key", "vr2E65ffhRAZlJTvwcrmq72zPo2wcSZuuLtQ4ITc");
         // if HTML responseCode is 200, then it's okay
