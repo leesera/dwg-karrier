@@ -66,7 +66,7 @@ public class ContentView extends AppCompatActivity {
     @Override
     protected void onPreExecute() {
       super.onPreExecute();
-      ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
+      ProgressBar progressBar = (ProgressBar)findViewById(R.id.progressBar);
       progressBar.setVisibility(View.VISIBLE);
     }
 
