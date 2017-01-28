@@ -97,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
       }
     });
-
   }
 
   private class GetPageList extends AsyncTask<String, Void, String> {
@@ -145,4 +144,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
   }
+
 }

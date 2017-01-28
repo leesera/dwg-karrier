@@ -12,6 +12,7 @@ import android.widget.TextView;
 import java.util.Date;
 
 public class ContentView extends AppCompatActivity {
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
