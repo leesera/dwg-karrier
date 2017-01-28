@@ -26,6 +26,9 @@ import android.support.v7.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
   static final String ACCESS_TOKEN = "A06EprS0187tNdGMJ1XPTVQa1eE8SeGLXZeK3GZy2UwZ8qzOGSqZlPmXNcYul0zueeQRLYwN1nWbFszj6PyoNOkCGSbUp9zfJ3eLROo3bJWsUQktkXPfbFruJn9TGFQQ5r16aLhP7f-VXMFNxMtlrJw21eabhWzhzO-9r0OkXBesU_0Kscpb4SaRPW4TpYpfGiusnAKhaWmeNYdu5VaCGMdFpoch:feedlydev";
   static final String ID = "3d0c7dd1-a7bb-4cdf-92f0-6c25d88c52db";
+  /*
+   * private DataBaseOpenHelper dataBaseOpenHelper;
+   */
 
   private static String convertStreamToString(InputStream is) {
 
@@ -54,10 +57,15 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
+    /*
+     * dataBaseOpenHelper = new DataBaseOpenHelper(this);
+     */
+
     Button btnFeedlyAccount = (Button) findViewById(R.id.FeedlyAccountBtn);
     btnFeedlyAccount.setOnClickListener(new Button.OnClickListener() {
       public void onClick(View v) {
         final String URL = "https://cloud.feedly.com/v3/streams/contents?streamId=user/" + ID + "/category/global.all";
+        //new GetPageList(dataBaseOpenHelper).execute(URL);
         new GetPageList().execute(URL);
       }
     });
@@ -66,6 +74,10 @@ public class MainActivity extends AppCompatActivity {
   private class GetPageList extends AsyncTask<String, Void, String> {
     /*
      * TODO(leesera): the constructor gets the DB as a parameter
+     * private DataBaseOpenHelper dataBaseOpenHelper;
+     *
+     * public GetPageList(DataBaseOpenHelper dataBaseOpenHelper) {
+     * }
      */
     public GetPageList() {
     }
@@ -87,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < len; i++) {
           /*
            * TODO(leesera): the url of script page should be saved at DB
-           * like arr.getJSONObject(i).getString("originId");
+           * dataBaseOpenHelper.insertScriptedData(arr.getJSONObject(i).getString("originId"));
            */
           //
         }
