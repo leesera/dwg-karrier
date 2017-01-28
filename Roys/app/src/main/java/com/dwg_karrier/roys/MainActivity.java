@@ -1,11 +1,14 @@
 package com.dwg_karrier.roys;
 
-<<<<<<< HEAD
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,10 +21,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-=======
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
->>>>>>> 9c50234... Modify ContentView
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
   static final String ACCESS_TOKEN = "A06EprS0187tNdGMJ1XPTVQa1eE8SeGLXZeK3GZy2UwZ8qzOGSqZlPmXNcYul0zueeQRLYwN1nWbFszj6PyoNOkCGSbUp9zfJ3eLROo3bJWsUQktkXPfbFruJn9TGFQQ5r16aLhP7f-VXMFNxMtlrJw21eabhWzhzO-9r0OkXBesU_0Kscpb4SaRPW4TpYpfGiusnAKhaWmeNYdu5VaCGMdFpoch:feedlydev";
@@ -67,6 +69,33 @@ public class MainActivity extends AppCompatActivity {
         final String URL = "https://cloud.feedly.com/v3/streams/contents?streamId=user/" + ID + "/category/global.all";
         //new GetPageList(dataBaseOpenHelper).execute(URL);
         new GetPageList().execute(URL);
+      }
+    });
+
+    Button b = (Button) findViewById(R.id.button);
+    final EditText editText = (EditText) findViewById(R.id.editText);
+
+    b.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        if (editText.getText().toString().isEmpty()) {
+          Toast toast = Toast.makeText(getApplicationContext(), "Input time!", Toast.LENGTH_LONG);
+          toast.setGravity(Gravity.BOTTOM, 0, 0);
+          toast.show();
+          return;
+        }
+
+        Date cur_time = new Date(System.currentTimeMillis());
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(cur_time);
+        String take_time = String.valueOf(editText.getText());
+        cal.add(Calendar.MINUTE, Integer.parseInt(take_time));
+        Date d = new Date(cal.getTimeInMillis());
+
+        Intent intent = new Intent(MainActivity.this, ListActivity.class);
+        intent.putExtra("text", fin_time);
+        intent.putExtra("time", cur_time);
+        startActivity(intent);
       }
     });
   }
@@ -115,6 +144,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onPostExecute(String result) {
 
     }
+=======
+    DataBaseOpenHelper dataBaseOpenHelper = new DataBaseOpenHelper(this);
+
+    ArrayList<ScriptedURL> scriptedURLs = dataBaseOpenHelper.getUrlList();
+
+    TextView textView = (TextView) findViewById(R.id.testText);
+    Log.d("arraylist","start");
+
+    int i=0;
+    String str="";
+    while(i<scriptedURLs.size()){
+      str = str+"\n"+scriptedURLs.get(i).url;
+      i++;
+    }
+
+    textView.setText(str);
+
+>>>>>>> a587756... add new class scriptsUrl and getUrlList() method
   }
 
 }
