@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -93,11 +92,12 @@ public class MainActivity extends AppCompatActivity {
         Date d = new Date(cal.getTimeInMillis());
 
         Intent intent = new Intent(MainActivity.this, ListActivity.class);
-        intent.putExtra("text", fin_time);
-        intent.putExtra("time", cur_time);
+        intent.putExtra("finTime", d);
+        intent.putExtra("curTime", curTime);
         startActivity(intent);
       }
     });
+
   }
 
   private class GetPageList extends AsyncTask<String, Void, String> {

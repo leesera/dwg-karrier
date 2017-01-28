@@ -1,15 +1,15 @@
-package com.dwg_karrier.roys;
+    package com.dwg_karrier.roys;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
+    import android.content.Intent;
+    import android.os.Bundle;
+    import android.support.v7.app.AppCompatActivity;
+    import android.util.Log;
+    import android.view.View;
+    import android.widget.AdapterView;
+    import android.widget.ListView;
 
-import java.util.ArrayList;
-import java.util.Date;
+    import java.util.ArrayList;
+    import java.util.Date;
 
 public class ListActivity extends AppCompatActivity {
   ListView lv;
@@ -37,6 +37,7 @@ public class ListActivity extends AppCompatActivity {
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent1 = new Intent(ListActivity.this, ContentView.class);
+        intent1.putExtra("finTime", finTime);
         intent1.putExtra("curTime", curTime);
         // TODO: put selected ScriptedData to intent. data[position]
         startActivity(intent1);
