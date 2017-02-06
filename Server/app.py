@@ -65,10 +65,6 @@ class Page(db.Model):
   def blogs(self):
     return Blog 
 
-<<<<<<< HEAD
-@app.route('/users', methods=['POST'])
-def create_user():
-=======
 class Recommender():
   def __init__(self):
     graphlab.product_key.set_product_key('D75B-9AD5-8257-3E33-E7B3-E7E6-EE34-7D86')
