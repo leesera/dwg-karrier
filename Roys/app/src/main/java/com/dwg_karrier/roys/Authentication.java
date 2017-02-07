@@ -1,11 +1,8 @@
 package com.dwg_karrier.roys;
 
-import static com.dwg_karrier.roys.R.layout.auth_dialog;
-
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -29,7 +26,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class Authentication {
+public class Authentication{
   static final String DEFAULTIMGURL = "https://blogdotstartlinkdotio.files.wordpress.com/2016/01/12620892_1077588858927687_1133266313_o.jpg?w=490&h=772";
   static final String CLIENTID = "sandbox";
   static final String CLIENTSECRET = "OE12J47X2W5PEF7CKPGZ";
@@ -66,13 +63,15 @@ public class Authentication {
   }
 
   void authenticationAndBringPages() {
-    final Dialog authDialog = new Dialog(mainContext);
-    authDialog.setContentView(auth_dialog);
+    final Dialog auth_dialog;
     WebView web;
-    web = (WebView) authDialog.findViewById(R.id.webv);
+    auth_dialog = new Dialog(mainContext);
+    auth_dialog.setContentView(R.layout.auth_dialog);
+    web = (WebView) auth_dialog.findViewById(R.id.webv);
     web.getSettings().setJavaScriptEnabled(true);
     web.loadUrl(OAUTHURL + "?redirect_uri=" + REDIRECTURI + "&response_type=code&client_id=" + CLIENTID + "&scope=" + OAUTHSCOPE);
     web.setWebViewClient(new WebViewClient() {
+      boolean authComplete = false;
       String authCode;
 
       @Override
@@ -86,16 +85,16 @@ public class Authentication {
         if (url.contains("?code=")) {
           Uri uri = Uri.parse(url);
           authCode = uri.getQueryParameter("code");
-          authDialog.dismiss();
+
+          auth_dialog.dismiss();
           new TokenGet(authCode, mainContext).execute();
         } else if (url.contains("error=access_denied")) {
           Log.i("", "ACCESS_DENIED_HERE");
-          authDialog.dismiss();
-          Toast.makeText(mainContext, "Bringing feedly count failed!", Toast.LENGTH_SHORT).show();
+          auth_dialog.dismiss();
         }
       }
     });
-    authDialog.show();
+    auth_dialog.show();
   }
 
   public JSONObject requestToken(String address, String token, String clientID, String clientSecret, String redirectUri, String grantType) {
@@ -128,14 +127,15 @@ public class Authentication {
   }
 
   private class TokenGet extends AsyncTask<String, String, JSONObject> {
-    private String code;
+    String code;
     private ProgressDialog pDialog;
-    private Context mainContext;
+    Context mainContext;
 
     public TokenGet(String tokencode, Context context) {
       code = tokencode;
       mainContext = context;
     }
+
 
     @Override
     protected void onPreExecute() {
@@ -157,8 +157,8 @@ public class Authentication {
     protected void onPostExecute(JSONObject json) {
       if (json != null) {
         try {
-          final String URL = "https://sandbox.feedly.com/v3/streams/contents?streamId=user/" + json.getString("id") + "/category/global.all";
-          new GetPageList(new DataBaseOpenHelper(mainContext), mainContext, json.getString("access_token"), pDialog).execute(URL);
+          final String URL = "https://cloud.feedly.com/v3/streams/contents?streamId=user/" + json.getString("id") + "/category/global.all";
+          new GetPageList(new DataBaseOpenHelper(mainContext), mainContext, json.getString("access_token"),pDialog).execute(URL);
         } catch (JSONException e) {
           e.printStackTrace();
         }
@@ -170,9 +170,9 @@ public class Authentication {
   }
 
   private class GetPageList extends AsyncTask<String, Void, String> {
-    String accessToken;
     private DataBaseOpenHelper dataBaseOpenHelper;
     private Context mainContext;
+    String accessToken;
     private ProgressDialog pDialog;
 
     public GetPageList(DataBaseOpenHelper dbHelper, Context context, String token, ProgressDialog dialog) {
@@ -192,6 +192,7 @@ public class Authentication {
     @Override
     protected String doInBackground(String... params) {
       try {
+        pDialog.setMessage("Bring Scripted Pages from Feedly ...");
         URL url = new URL(params[0]);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Authorization", "OAuth " + accessToken);
@@ -201,10 +202,10 @@ public class Authentication {
 
         JSONObject obj = new JSONObject(result);
         JSONArray arr = obj.getJSONArray("items");
-        final int len = arr.length();
+        int len = arr.length();
 
         //For Test
-        //dataBaseOpenHelper.deleteAllPage();
+        dataBaseOpenHelper.deleteAllPage();
         //dataBaseOpenHelper.getTableAsString();
 
         final int WORDPERMIN = 40;
@@ -212,9 +213,9 @@ public class Authentication {
         for (int i = 0; i < len; i++) {
           JSONObject feed = arr.getJSONObject(i);
           String feedUrl = feed.getString("originId");
-          String feedTitle = (String) feed.get("title");
+          String feedTitle = feed.getString("title");
           JSONObject feedSummary = feed.getJSONObject("summary");
-          String feedContent = (String) feedSummary.get("content");
+          String feedContent = feedSummary.getString("content");
           int feedExpectedTime = countWords(feedContent) / WORDPERMIN;
 
           //Please Let me know if you have smart way of getting image url from html :)
@@ -222,14 +223,9 @@ public class Authentication {
           if (imgUrl == null) {
             imgUrl = DEFAULTIMGURL;
           }
-
-          // TODO: add another check url duplication method. (Without database query.)
-          if (!dataBaseOpenHelper.isDuplicatedUrl(feedUrl)) {
-            dataBaseOpenHelper.insertScriptedData(feedUrl, feedTitle, feedContent, feedExpectedTime, imgUrl);
-          }
+          dataBaseOpenHelper.insertScriptedDataWithCheckDuplication(feedUrl, feedTitle, feedContent, feedExpectedTime, imgUrl);
         }
         urlConnection.disconnect();
-
       } catch (IOException | JSONException e) {
         e.printStackTrace();
       } catch (Exception e) {
@@ -245,8 +241,6 @@ public class Authentication {
           "Bring the pages from your feedly account", Toast.LENGTH_LONG);
       toast.setGravity(Gravity.CENTER, 0, 0);
       toast.show();
-      Intent startRoys = new Intent(mainContext, MainActivity.class);
-      mainContext.startActivity(startRoys);
     }
   }
 }
