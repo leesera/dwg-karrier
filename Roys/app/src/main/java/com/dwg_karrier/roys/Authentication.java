@@ -65,7 +65,7 @@ public class Authentication {
   }
 
   void authenticationAndBringPages() {
-    Dialog authDialog = new Dialog(mainContext);
+    final Dialog authDialog = new Dialog(mainContext);
     authDialog.setContentView(auth_dialog);
     WebView web;
     web = (WebView) authDialog.findViewById(R.id.webv);
