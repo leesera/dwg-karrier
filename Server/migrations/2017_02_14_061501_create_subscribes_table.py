@@ -9,7 +9,6 @@ class CreateSubscribesTable(Migration):
         """
         with self.schema.create('subscribes') as table:
             table.increments('id')
-            table.timestamps()
             table.integer('subscriber_id').unsigned()
             table.integer('subscribed_id').unsigned()
             table.timestamps()

@@ -1,4 +1,5 @@
 import os
+import sys
 from flask import Flask, request
 from flask_orator import Orator, jsonify
 from orator.orm import belongs_to, has_many, belongs_to_many
@@ -21,26 +22,32 @@ app.config.from_object(__name__)
 db = Orator(app)
 
 class User(db.Model):
-
   __fillable__ = ['accessToken', 'email']
   __table__ = 'users'
 
-  @belongs_to_many(
-       'subscribes',
-       'subscriber_id', 'subscribed_id',
-       with_timestamps=True
-  )
-  def subscribes(self):
-        return Blog
+  @belongs_to_many('subscribes','subscriber_id','subscribed_id')
+  def blogs(self):
+    return Blog
+
+  def is_subscribing(self, blog):
+            return self.blogs().where('subscribed_id', blog.id).exists()
+
+  def subscribes(self,blog):
+    if not self.is_subscribing(blog):
+      self.blogs().attach(blog)
+
+  def find_recommend(self):
+    blogs = self.subscribes()
+
 
 
 class Blog(db.Model):
   __fillable__ = ['url']
+  __table__ = 'blogs'
 
   @belongs_to_many(
-       'subscribers',
-       'subscribed_id', 'subscriber_id',
-       with_timestamps=True
+       'subscribes',
+       'subscribed_id', 'subscriber_id'
   )
   def subscribers(self):
         return User
@@ -49,6 +56,9 @@ class Blog(db.Model):
   def pages(self):
     return Page
 
+class Subscribe(db.Model):
+  __fillable__=['subscribed_id','subscriber_id']
+  __table__ = 'subscribes'
 
 class Page(db.Model):
   __fillable__ = ['pageUrl']
@@ -58,16 +68,25 @@ class Page(db.Model):
 
 @app.route('/users', methods=['POST'])
 def create_user():
-  user = User.create(**request.get_json())
+  params=  request.get_json()
+  _accessToken = params['accessToken']
+  _email = params['email']
+  user = User.first_or_create(accessToken=_accessToken,email=_email)
+  blogs = params['blogs']
+
+  for burl in blogs:
+    blog = Blog.first_or_create(url=burl)
+    user.subscribes(blog)
+  
 
   return jsonify(user)
 
 
 @app.route('/users/<int:user_id>/recommend', methods=['GET'])
-def get_user_messages(user_id):
+def get_user_recommend(user_id):
   user = User.find_or_fail(user_id)
-  find_recommend(user)
-  
+  #TODO(seralee)
+  #return jsonify(user.find_recommend())
   return None 
 
 
