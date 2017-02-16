@@ -3,6 +3,7 @@ import sys
 from flask import Flask, request
 from flask_orator import Orator, jsonify
 from orator.orm import belongs_to, has_many, belongs_to_many
+import graphlab
 
 # Configuration
 DEBUG = True
@@ -21,6 +22,8 @@ app.config.from_object(__name__)
 # Initializing Orator
 db = Orator(app)
 
+
+
 class User(db.Model):
   __fillable__ = ['accessToken', 'email']
   __table__ = 'users'
@@ -35,10 +38,6 @@ class User(db.Model):
   def subscribes(self,blog):
     if not self.is_subscribing(blog):
       self.blogs().attach(blog)
-
-  def find_recommend(self):
-    blogs = self.subscribes()
-
 
 
 class Blog(db.Model):
@@ -66,28 +65,60 @@ class Page(db.Model):
   def blogs(self):
     return Blog 
 
+class Recommender():
+  def __init__(self):
+    graphlab.product_key.set_product_key('D75B-9AD5-8257-3E33-E7B3-E7E6-EE34-7D86')
+    users = User.all()
+    userIds = []
+    blogIds = []
+    for user in users :
+      blogs = user.blogs
+      for blog in blogs :
+        userIds.append(user.id)
+        blogIds.append(blog.id)
+
+    self.sf = graphlab.SFrame({'user_id':userIds,'item_id':blogIds})
+    self.recommender = graphlab.recommender.create(self.sf)
+
+  def append (self, userId, blogIds) :
+    sf = graphlab.SFrame({'user_id':[userId]*len(blogIds),'item_id':blogIds})
+    self.sf.append(sf)
+    self.recommender = graphlab.recommender.create(self.sf)
+
+  def recommend(self,userId) :
+    return self.recommender([userId])
+
+recommender = Recommender()
+    
+
 @app.route('/users', methods=['POST'])
 def create_user():
+  global recommender
   params=  request.get_json()
   _accessToken = params['accessToken']
   _email = params['email']
   user = User.first_or_create(accessToken=_accessToken,email=_email)
   blogs = params['blogs']
+  newBlogs = []
 
   for burl in blogs:
     blog = Blog.first_or_create(url=burl)
-    user.subscribes(blog)
-  
+    sub = Subscribe.where("subscribed_id",blog.id).where("subscriber_id",user.id).get()
+    if (sub == None) :
+      user.subscribes(blog)
+      newBlogs.append(blog.id)
+
+  recommender.append(user.id,newBlogs)
 
   return jsonify(user)
 
 
 @app.route('/users/<int:user_id>/recommend', methods=['GET'])
 def get_user_recommend(user_id):
+  global recommender
   user = User.find_or_fail(user_id)
   #TODO(seralee)
-  #return jsonify(user.find_recommend())
-  return None 
+  return jsonify(recommender.recommend(user_id))
 
 
 if __name__ == '__main__':
