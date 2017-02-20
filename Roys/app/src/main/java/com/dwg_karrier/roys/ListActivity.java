@@ -1,5 +1,7 @@
 package com.dwg_karrier.roys;
 
+import static com.dwg_karrier.roys.ContentSwipe.saveSwipeActivity;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -41,7 +43,6 @@ public class ListActivity extends AppCompatActivity {
     lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // TODO: put selected ScriptedData to intent. data[position]
         Intent openSelectedPage = new Intent(ListActivity.this, ContentView.class);
         openSelectedPage.putExtra("finTime", finTime);
         openSelectedPage.putExtra("curTime", curTime);
@@ -60,6 +61,7 @@ public class ListActivity extends AppCompatActivity {
     changeMode.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
+        saveSwipeActivity = null;
         Intent openSwipe = new Intent(ListActivity.this, ContentSwipe.class); // open Recommend Lists
         openSwipe.putExtra("finTime", finTime);
         openSwipe.putExtra("curTime", curTime);
@@ -82,9 +84,8 @@ public class ListActivity extends AppCompatActivity {
   private ArrayList<ScriptedURL> callUrl() {
     DataBaseOpenHelper dbHelper = new DataBaseOpenHelper(this);
     dbHelper.getTableAsString();
-    double tempTime;
-    final int wordsperMin = 180;
     ArrayList<ScriptedURL> unreadPageList = dbHelper.getUnreadUrlList();
+
     return unreadPageList;
   }
 }

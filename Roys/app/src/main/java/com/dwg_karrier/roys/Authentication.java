@@ -5,6 +5,7 @@ import static com.dwg_karrier.roys.R.layout.auth_dialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -72,7 +73,6 @@ public class Authentication {
     web.getSettings().setJavaScriptEnabled(true);
     web.loadUrl(OAUTHURL + "?redirect_uri=" + REDIRECTURI + "&response_type=code&client_id=" + CLIENTID + "&scope=" + OAUTHSCOPE);
     web.setWebViewClient(new WebViewClient() {
-      boolean authComplete = false;
       String authCode;
 
       @Override
@@ -86,7 +86,6 @@ public class Authentication {
         if (url.contains("?code=")) {
           Uri uri = Uri.parse(url);
           authCode = uri.getQueryParameter("code");
-
           authDialog.dismiss();
           new TokenGet(authCode, mainContext).execute();
         } else if (url.contains("error=access_denied")) {
@@ -158,7 +157,7 @@ public class Authentication {
     protected void onPostExecute(JSONObject json) {
       if (json != null) {
         try {
-          final String URL = "https://cloud.feedly.com/v3/streams/contents?streamId=user/" + json.getString("id") + "/category/global.all";
+          final String URL = "https://sandbox.feedly.com/v3/streams/contents?streamId=user/" + json.getString("id") + "/category/global.all";
           new GetPageList(new DataBaseOpenHelper(mainContext), mainContext, json.getString("access_token"), pDialog).execute(URL);
         } catch (JSONException e) {
           e.printStackTrace();
@@ -193,7 +192,6 @@ public class Authentication {
     @Override
     protected String doInBackground(String... params) {
       try {
-        pDialog.setMessage("Bring Scripted Pages from Feedly ...");
         URL url = new URL(params[0]);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Authorization", "OAuth " + accessToken);
@@ -214,9 +212,9 @@ public class Authentication {
         for (int i = 0; i < len; i++) {
           JSONObject feed = arr.getJSONObject(i);
           String feedUrl = feed.getString("originId");
-          String feedTitle = feed.getString("title");
+          String feedTitle = (String) feed.get("title");
           JSONObject feedSummary = feed.getJSONObject("summary");
-          String feedContent = feedSummary.getString("content");
+          String feedContent = (String) feedSummary.get("content");
           int feedExpectedTime = countWords(feedContent) / WORDPERMIN;
 
           //Please Let me know if you have smart way of getting image url from html :)
@@ -224,9 +222,14 @@ public class Authentication {
           if (imgUrl == null) {
             imgUrl = DEFAULTIMGURL;
           }
-          dataBaseOpenHelper.insertScriptedDataWithCheckDuplication(feedUrl, feedTitle, feedContent, feedExpectedTime, imgUrl);
+
+          // TODO: add another check url duplication method. (Without database query.)
+          if (!dataBaseOpenHelper.isDuplicatedUrl(feedUrl)) {
+            dataBaseOpenHelper.insertScriptedData(feedUrl, feedTitle, feedContent, feedExpectedTime, imgUrl);
+          }
         }
         urlConnection.disconnect();
+
       } catch (IOException | JSONException e) {
         e.printStackTrace();
       } catch (Exception e) {
@@ -242,6 +245,8 @@ public class Authentication {
           "Bring the pages from your feedly account", Toast.LENGTH_LONG);
       toast.setGravity(Gravity.CENTER, 0, 0);
       toast.show();
+      Intent startRoys = new Intent(mainContext, MainActivity.class);
+      mainContext.startActivity(startRoys);
     }
   }
 }

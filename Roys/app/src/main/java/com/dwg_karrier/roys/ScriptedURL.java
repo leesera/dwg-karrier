@@ -1,5 +1,7 @@
 package com.dwg_karrier.roys;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 public class ScriptedURL {
   private String url;
   private boolean isRead;
@@ -7,7 +9,7 @@ public class ScriptedURL {
   private double expectedTime;
   private String title;
   private String content;
-
+  private String repImageUrl;
 
   ScriptedURL(String url, boolean isRead) {
     this.url = url;
@@ -17,11 +19,7 @@ public class ScriptedURL {
 
   ScriptedURL(String url, int isRead) {
     this.url = url;
-    if (isRead == 1) {
-      this.isRead = true;
-    } else {
-      this.isRead = false;
-    }
+    this.isRead = isRead == 1;
     this.crawler = new Crawler(url);
     this.title = crawler.getTitle();
     this.content = crawler.getContent();
@@ -34,24 +32,20 @@ public class ScriptedURL {
   }
 
   ScriptedURL(int isRead, String title, String content, double expectedTime) {
-    if (isRead == 1) {
-      this.isRead = true;
-    } else {
-      this.isRead = false;
-    }
+	  
+    this.isRead = isRead == 1;
     this.title = title;
     this.content = content;
     this.expectedTime = expectedTime;
   }
 
-  ScriptedURL(String url, int isRead, int wordCount) {
+  ScriptedURL(String url, int isRead, String title, String content, String repImageUrl, double expectedTime) {
     this.url = url;
-    if (isRead == 1) {
-      this.isRead = true;
-    } else {
-      this.isRead = false;
-    }
-    this.crawler = new Crawler(url);
+    this.isRead = isRead == 1;
+    this.title = StringEscapeUtils.unescapeHtml4(title);
+    this.content = StringEscapeUtils.unescapeHtml4(content);
+    this.repImageUrl = repImageUrl;
+    this.expectedTime = expectedTime;
   }
 
   public String getUrl() {
@@ -72,5 +66,9 @@ public class ScriptedURL {
 
   public double getExpectedTime() {
     return expectedTime;
+  }
+
+  public String getRepImageUrl() {
+    return repImageUrl;
   }
 }
